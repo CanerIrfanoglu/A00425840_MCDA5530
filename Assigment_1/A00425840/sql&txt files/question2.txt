@@ -1,0 +1,6 @@
+RelaX - relational algebra calculator is used for ensuring the validity of 
+relational algebra expressions. It can be found at:
+
+https://dbis-uibk.github.io/relax/calc.htm
+
+(a) Get the names of courses in the CS department.T σ(Department=“CS”)(Course)Result = π(Course_name)(T);(b) Get the names of students who got an 'A' in CS3380.Result = π Name (STUDENT ⨝ σ Grade = 'A' (GRADE_REPORT) ⨝ σ Course_number = 'CS3380' (SECTION))(c) Get the instructors who have taught CS1310 and CS3380.T =  σ Course_number = 'CS1310' ∨ Course_number = 'CS3380' (SECTION)Result = π (Instructor) (T)(d) Get the instructors who have taught all courses of the CS department. Result = π Instructor,Course_number (SECTION) ÷ π Course_number (σ Department = 'CS' (COURSE))

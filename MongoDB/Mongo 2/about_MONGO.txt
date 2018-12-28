@@ -1,0 +1,128 @@
+HOW to LOGIN to the Mongo server:
+-
+$ mongo "<dbname>" -p -u "<user_name>"
+Enter password: <password>
+MongoDB shell version: 3.0.7
+connecting to: <your_user_name>
+>      # can now enter commands
+-
+Or you can give the password on the command line:
+-
+$ mongo "<dbname>" -u "<user_name>" --password="your_password"
+MongoDB shell version: 3.0.7
+connecting to: <your_user_name>
+>      # can now enter commands
+Note that the quotes above are important.
+
+
+COMMANDS inside mongo (case sensitive; not terminated with ';'):
+-
+> help
+>            the next two require sys admin permit
+> show dbs     // does NOT show dbs having no collections !!
+> use <db_name>  //creates db (if not exists) 
+>
+> // this is a line comment
+>
+> db.createCollection("...." [,<option>])
+> show collections
+> db.<collection>.drop()   // deletes collection
+>
+> db.changeUserPassword("<user_name>", "<new_pass>")
+>
+> load("..file..")    // executes the js file
+>
+> db.<collection>.find(<query>, <projection>)
+-
+Return the field values specified in <projection>
+from all documents satisfying the <query>. By default,
+the field _id is returned, unless excluded explicitly.
+Either argument could be empty or {} or {...}.
+In particular,  <projection> = 
+  { field1: <boolean>, field2: <boolean> ... }, where
+  <boolean> is 0 or 1 or true or false
+It cannot contain both include and exclude specifications, except for the exclusion of the _id field
+-
+> db.<collection>.find(<query>, <projection>).limit(n)
+As above, but returns up to n documents
+-
+> db.<collection>.find(<query>, <projection>).sort({<field>:1})
+As above, but returns documents in ascending order by <field> values
+-
+find shows only 20 objects at a time and then can show more if user enters "it". In order to show all matching objects, one can do
+> db.<collection>.find(...).toArray()
+which shows all as an array. However, for a more compact output, as a concatenation of objects, one per line, one can use
+> db.<collection>.find(...).forEach(function(obj){print(tojson(obj,'',true));})
+-
+Examples of queries:
+>
+> db.<coll>.find({colour: {$exists: false}})
+Returns all docs that have NO field called colour
+>db.dogs.find({gender: 'f', $or: [{loves: 'apples'}, 
+ {loves: 'bread'}, {weight: {$lt: 100}}])
+Returns all female dogs that either love apples or
+bread or weigh less than 100 pounds.
+
+
+LINUX SHELL COMMANDS RELATED TO MONGO
+-
+To IMPORT from a file  <F>  containing json objects, one per line:
+>
+$ mongoimport -d <db_name> -p "<pass>" -u <user> -c <collection> --file <F>
+-         
+Note: the collection need not exist. If the file <F> contains an array of
+objects, use the flag --jsonArray
+Optionally can use flag host, that is,  --host localhost
+-
+NOTE: The file type could be csv, json, tsv. Use the flag
+--type <value>, where <value> = csv, json, tsv
+In the case of csv or tsv files, they might begin with a 
+header line and, in tis case, also use the flag --headerline.
+>
+$ mongoimport -d <db_name> -p <pass> -u <user> -c <collection> --type csv --headerline --file <F>
+-
+-
+To EXPORT a collection to a file <F> of type csv (or json):
+$  mongoexport -d <db_name> -p <pass> -u <user> -c <collection> --type csv --fields fname,lname,email --out authors_5504.csv
+-
+NOTE: By default, overwrites output file when it exists. 
+Use --type=csv to specify CSV format for the output.
+In this case, you must specify which fields to output.
+Use --type=json to output in JSON format.
+Option --type-tsv is NOT supported.
+-
+-
+EXECUTING MONGO COMMANDS FROM THE LINUX SHELL
+-
+$ mongo --eval "<mongo_command>"   #use single quotes to prevent unix evaluating content
+$ ...                              #of command. Used only to evaluate, eg not to show dbs
+$
+$ mongo <db> --eval '<mongo_command>'     #optionally specify database name: <db>
+$ ...
+$ mongo --eval '<mongo_command>'  --quiet    #not to show noise 
+$ ...
+$ mongo < script.js
+$ ...
+$ echo "<mongo_command>" | mongo <db_name> -u <user> -p <pass>
+- Passes the mongo command into the mongo server and connects
+  to the server using the given database/user/pass credentials
+- Examples
+$ echo "show collections" | mongo <db_name> -u <user> -p <pass>
+$ ...
+$ echo "db.author.find()" | mongo <db_name> -u <user> -p <pass>
+$ ...
+
+
+JAVASCRIPT COMMANDS
+-
+Convert  string into a JavaScript object:
+> var obj = JSON.parse(text);
+-
+Print json object:
+> print(tojson(obj));
+> print(tojson(obj),"",true);   //compact, in one line
+
+
+VARIOUS FACTS 
+-
+- _id always has an index with unique constraint 

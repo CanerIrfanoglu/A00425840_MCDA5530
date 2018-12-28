@@ -1,0 +1,49 @@
+-- this is an example.Site= https://dbis-uibk.github.io/relax/calc.htm
+
+group: Student and Courses 
+
+
+STUDENT = {
+	Name:string, Student_number:number, Class:number, Major:string
+	Smith,  17, 1, CS
+	BROWN, 8, 2, CS
+}
+
+COURSE = {
+ Course_name:string, Course_number:string, Credit_hours:number, Department:string
+ Intro_to_Computer_Science, CS1310, 4, CS
+ Data_Structures, CS3320, 4, CS
+ Discrete_Mathematics, MATH2410, 3, MATH
+ Database, CS3380, 3, CS
+}
+
+SECTION = {
+ Section_identifier:number, Course_number:string, Semester:string, Year:number, Instructor:string
+85, MATH2410, Fall, 07, King
+92, CS1310, Fall, 07, Anderson
+102, CS3320, Spring, 08, Knuth
+112, MATH2410, Fall, 08, Chang
+119, CS1310, Fall, 08, Anderson
+135, CS3380, Fall, 08, Stone
+}
+
+GRADE_REPORT = {
+Student_number:number, Section_identifier:number, Grade:string
+17, 112, B
+17, 119, C
+8, 85, A
+8, 92, A
+8, 102, B
+8, 135, A
+}
+
+PREREQUISITE = {
+Course_number:string, Prerequisite_number:string
+CS3380 CS3320
+CS3380, MATH2410
+CS3320, CS1310
+}
+
+
+
+

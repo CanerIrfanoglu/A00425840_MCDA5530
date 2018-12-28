@@ -1,0 +1,124 @@
+Start by importing an array of json objects into mongo, where
+the array is stored in the file "orders.json"
+I have included also the files suppliers.json and parts.json
+in case there is time to do more examples with these files.
+
+$
+$ mongoimport -d u00 -p "password" -u u00 -c orders --file orders.json --jsonArray
+2016-09-24T20:08:14.168-0300	connected to: localhost
+2016-09-24T20:08:14.233-0300	imported 2000 documents
+$ mongo cda54000 -u cda54000 -p
+MongoDB shell version: 3.0.7
+Enter password: 
+connecting to: u00
+>
+> show collections
+orders
+> 
+> db.orders.find()
+....shows documents in collection orders
+>
+> db.orders.find({},{_id:0, date:1})
+{ "date" : "2012-12-09" }
+{ "date" : "2011-10-03" }
+............
+>
+> db.orders.find({},{_id:1, date:1})
+{ "_id" : 1, "date" : "2012-12-09" }
+{ "_id" : 2, "date" : "2011-10-03" }
+............
+>
+> db.orders.find({},{_id:1, date:0})  // cannot mix 0 and 1
+Error: error: {.......   
+>
+> ## show all items for order with _id=1
+> db.orders.find({_id:1},{items:1})
+{ "_id" : 1, "items" : [ { "part_id" : 60, "qty" : 8, "price" : 614.73 }, { "part_id" : 29, "qty" : 2, "price" : 811.8 }, { "part_id" : 388, "qty" : 6, "price" : 255.55 } ] }
+>
+> ## show id's and items of all orders of supplier with supp_id = 10
+> db.orders.find({supp_id:10},{items:1})
+>
+> ##  find the dates and item lists of all orders in March of 2013
+> db.orders.find({date: {$regex: "2013-03.*"}},{_id:0, date:1, items:1})
+{ "date" : "2013-03-31", "items" : [ { "part_id" : 231, "qty" : 9, "price" : 38.64 } ] }
+...........
+> ## find _id's of orders involving part 15; quotes are important:
+> db.orders.find({"items.part_id":15},{_id:1})
+{ "_id" : 423 }
+{ "_id" : 443 }
+{ "_id" : 1117 }
+{ "_id" : 1378 }
+{ "_id" : 1403 }
+{ "_id" : 1670 }
+{ "_id" : 1735 }
+{ "_id" : 1892 }
+{ "_id" : 1948 }
+>
+> ## find id's of orders involving an item quantity greater than 9
+> db.orders.find({"items.qty":{$gt:9}},{_id:1})
+{ "_id" : 2 }
+{ "_id" : 3 }
+.......
+>
+> db.orders.find({"items.qty":{$gt:9}},{_id:1,"items.qty":1})
+{ "_id" : 2, "items" : [ { "qty" : 10 }, { "qty" : 8 }, { "qty" : 5 }, { "qty" : 6 } ] }
+{ "_id" : 3, "items" : [ { "qty" : 10 }, { "qty" : 8 }, { "qty" : 2 }, { "qty" : 1 } ] }
+.......
+>
+> db.orders.find()
+{ "_id" : 1, "date" : "2012-12-09", "supp_id" : 59, "items" : [ { "part_id" : 60, "qty" : 8, "price" : 614.73 }, { "part_id" : 29, "qty" : 2, "price" : 811.8 }, { "part_id" : 388, "qty" : 6, "price" : 255.55 } ] }
+.....
+> 
+> ## change supplier id of order 1 to 50
+> db.orders.update({_id:1},{$set:{"supp_id":50}},{})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.orders.find()
+{ "_id" : 1, "date" : "2012-12-09", "supp_id" : 50, "items" : [ { "part_id" : 60, "qty" : 8, "price" : 614.73 }, { "part_id" : 29, "qty" : 2, "price" : 811.8 }, { "part_id" : 388, "qty" : 6, "price" : 255.55 } ] }
+.....
+> 
+> ## add (push) a part into the order with id 1:
+> db.orders.update({_id:1},{$push:{"items":{"part_id":5,"qty":5,"price":5.00}}},{})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> 
+> db.orders.find({_id:1},{})
+{ "_id" : 1, "date" : "2012-12-09", "supp_id" : 50, "items" : [ { "part_id" : 60, "qty" : 8, "price" : 614.73 }, { "part_id" : 29, "qty" : 2, "price" : 811.8 }, { "part_id" : 388, "qty" : 6, "price" : 255.55 }, { "part_id" : 5, "qty" : 5, "price" : 5 } ] }
+> 
+> 
+>
+> ## the file "make_coll_ordparts.js"  contains java script code
+> ## to make a new collection, called ordparts, with flat documents
+> ## having fields: _id, ord_id, part_id, qty, price
+>
+> load ('make_coll_ordparts.js');
+true
+> db.ordparts.count();
+5981
+> db.ordparts.find();
+{ "_id" : 5919, "ord_id" : 1388, "part_id" : 53, "qty" : 10, "price" : 76.44 }
+{ "_id" : 5920, "ord_id" : 1388, "part_id" : 318, "qty" : 1, "price" : 499 }
+{ "_id" : 5921, "ord_id" : 1388, "part_id" : 176, "qty" : 1, "price" : 937 }
+{ "_id" : 5922, "ord_id" : 1389, "part_id" : 260, "qty" : 10, "price" : 783.51 }
+.....
+>
+> ## the same can be achieved by using a pointer instead of the array X in 
+> ## make_coll_ordparts.js. See the file make_coll_ordparts2.js
+>
+> db.ordparts.remove({});
+WriteResult({ "nRemoved" : 5981 })
+> 
+> db.ordparts.count();
+0
+> 
+> load ('make_coll_ordparts2.js');
+true
+> db.ordparts.count();
+5981
+> db.ordparts.find();
+{ "_id" : 5919, "ord_id" : 1388, "part_id" : 53, "qty" : 10, "price" : 76.44 }
+{ "_id" : 5920, "ord_id" : 1388, "part_id" : 318, "qty" : 1, "price" : 499 }
+{ "_id" : 5921, "ord_id" : 1388, "part_id" : 176, "qty" : 1, "price" : 937 }
+{ "_id" : 5922, "ord_id" : 1389, "part_id" : 260, "qty" : 10, "price" : 783.51 }
+.......
+
+
+
